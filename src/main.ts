@@ -5,16 +5,28 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import * as fs from 'fs';
 import * as path from 'path';
+import { config } from 'dotenv';
+
+// Load environment variables
+config();
 
 async function bootstrap() {
     // SSL configuration
-    const httpsOptions = {
-        key: fs.readFileSync(path.join(__dirname, '../ssl/private.key')),
-        cert: fs.readFileSync(path.join(__dirname, '../ssl/certificate.crt')),
-    };
+    let httpsOptions = undefined;
+
+    if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH) {
+        try {
+            httpsOptions = {
+                key: fs.readFileSync(process.env.SSL_KEY_PATH),
+                cert: fs.readFileSync(process.env.SSL_CERT_PATH),
+            };
+        } catch (error) {
+            console.warn('SSL certificates not found, running without SSL:', error.message);
+        }
+    }
 
     const app = await NestFactory.create(AppModule, {
-        httpsOptions,
+        ...(httpsOptions && { httpsOptions }),
         logger: WinstonModule.createLogger({
             transports: [
                 new winston.transports.Console({
@@ -44,9 +56,9 @@ async function bootstrap() {
     app.useGlobalPipes(new ValidationPipe());
     app.setGlobalPrefix('api/v1');
 
-    const port = process.env.PORT || 443; // Changed to default HTTPS port
+    const port = process.env.PORT || 443;
     await app.listen(port);
-    console.log(`Application is running on: https://localhost:${port}`);
+    console.log(`Application is running on: ${httpsOptions ? 'https' : 'http'}://localhost:${port}`);
 }
 
 bootstrap(); 
