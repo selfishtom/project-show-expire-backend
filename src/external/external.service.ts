@@ -171,9 +171,9 @@ export class ExternalService {
     }
 
     /**
-     * Refresh session every 30 minutes
+     * Refresh session every 5 Hours
      */
-    @Cron(CronExpression.EVERY_30_MINUTES)
+    @Cron(CronExpression.EVERY_5_HOURS)
     async refreshSession() {
         try {
             await this.login();
