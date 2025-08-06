@@ -29,7 +29,7 @@ interface SearchResponse {
 export class ExternalService {
     private readonly logger = new Logger(ExternalService.name);
     private lastLoginTime: Date | null = null;
-    private readonly SESSION_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+    private readonly SESSION_DURATION = 590 * 60 * 1000; // 5h:50min in milliseconds
     private cookies: string[] = [];
 
     constructor(
